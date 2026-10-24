@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>บันทึกรายรับรายจ่าย</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f5f6f8;--card:#fff;--text:#1d2330;--mute:#6b7385;--line:#e3e6ec;--in:#1c8a4e;--inbg:#e2f4e9;--out:#c93a3a;--outbg:#fbe5e5;--pend:#b7791f;--pendbg:#fdf0d5;--acc:#2f5fe0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#14171d;--card:#1d222b;--text:#eceff5;--mute:#9aa3b5;--line:#2c3340;--in:#52c685;--inbg:#173626;--out:#ee7272;--outbg:#3d1e1e;--pend:#e9b44c;--pendbg:#3a2f14;--acc:#7b9cff}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#14171d;--card:#1d222b;--text:#eceff5;--mute:#9aa3b5;--line:#2c3340;--in:#52c685;--inbg:#173626;--out:#ee7272;--outbg:#3d1e1e;--pend:#e9b44c;--pendbg:#3a2f14;--acc:#7b9cff}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Noto Sans Thai',system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.5}
+.wrap{max-width:900px;margin:0 auto;padding:16px}
+h1{font-size:1.4rem;margin:8px 0 14px}
+h2{font-size:1rem;margin:0 0 10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+.total{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.total .big{font-size:1.8rem;font-weight:700}
+.banks{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:14px}
+.bank{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.bank .name{font-weight:700;display:flex;justify-content:space-between}
+.bank .net{font-size:1.4rem;font-weight:700;margin:2px 0 6px}
+.row{display:flex;justify-content:space-between;font-size:.85rem;color:var(--mute)}
+.pos{color:var(--in)}.neg{color:var(--out)}.pen{color:var(--pend)}
+form{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+label{font-size:.8rem;color:var(--mute);display:block;margin-bottom:3px}
+input,select,button{font:inherit;color:var(--text)}
+input,select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.types{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;grid-column:1/-1}
+.types input{display:none}
+.types label{margin:0;text-align:center;padding:9px 4px;border:1.5px solid var(--line);border-radius:10px;cursor:pointer;color:var(--text);font-size:.9rem}
+.types input:checked+label.t-in{background:var(--inbg);border-color:var(--in);color:var(--in);font-weight:600}
+.types input:checked+label.t-out{background:var(--outbg);border-color:var(--out);color:var(--out);font-weight:600}
+.types input:checked+label.t-pen{background:var(--pendbg);border-color:var(--pend);color:var(--pend);font-weight:600}
+.bigamt{grid-column:1/-1}.bigamt input{font-size:2rem;font-weight:700;text-align:center;padding:14px 10px}
+.types input:checked+label.t-done{background:var(--outbg);border-color:var(--out);color:var(--out);font-weight:600}
+.add{grid-column:1/-1;background:var(--acc);color:#fff;border:0;border-radius:10px;padding:11px;font-weight:600;cursor:pointer}
+.filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.chip{border:1px solid var(--line);background:var(--bg);border-radius:20px;padding:4px 12px;font-size:.85rem;cursor:pointer}
+.chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.item{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:0}
+.item .info{flex:1;min-width:0}
+.item .t{font-weight:600;overflow-wrap:anywhere}
+.item .s{font-size:.8rem;color:var(--mute)}
+.amt{font-weight:700;white-space:nowrap}
+.tag{font-size:.7rem;padding:1px 8px;border-radius:10px;margin-left:6px}
+.tag.in{background:var(--inbg);color:var(--in)}.tag.out{background:var(--outbg);color:var(--out)}.tag.pen{background:var(--pendbg);color:var(--pend)}
+.mini{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:3px 8px;font-size:.75rem;cursor:pointer;margin-top:4px;margin-right:4px}
+.del{background:none;border:0;color:var(--mute);cursor:pointer;font-size:1.1rem;padding:4px 8px}
+.empty{text-align:center;color:var(--mute);padding:20px 0}
+.reset{background:none;border:0;color:var(--mute);font-size:.8rem;text-decoration:underline;cursor:pointer;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>💰 บันทึกรายรับรายจ่าย</h1>
+
+  <div class="card total">
+    <div><div class="row">ยอดสุทธิรวมทุกธนาคาร</div><div class="big" id="totNet">0.00</div></div>
+    <div style="text-align:right" class="row"><div>รับ <b class="pos" id="totIn">0</b> · จ่าย <b class="neg" id="totOut">0</b></div><div>รอดำเนินการ <b class="pen" id="totPen">0</b></div></div>
+  </div>
+
+  <div class="banks" id="banks"></div>
+
+  <div class="card">
+    <h2>เพิ่มรายการ</h2>
+    <form id="f">
+      <div class="types">
+        <input type="radio" name="type" id="r1" value="in" checked><label class="t-in" for="r1">⬆ รายรับ</label>
+        <input type="radio" name="type" id="r2" value="out"><label class="t-out" for="r2">⬇ รายจ่าย</label>
+        <input type="radio" name="type" id="r3" value="pending"><label class="t-pen" for="r3">⏳ รอดำเนินการ</label>
+        <input type="radio" name="type" id="r4" value="done"><label class="t-done" for="r4">✅ ดำเนินการแล้ว</label>
+      </div>
+      <div class="bigamt"><label for="amount">จำนวนเงิน (บาท)</label><input id="amount" type="number" step="0.01" min="0.01" inputmode="decimal" placeholder="0.00" required></div>
+      <div><label for="date">วันที่</label><input type="date" id="date" required></div>
+      <div><label for="bank">ธนาคาร</label><select id="bank"></select></div>
+      <div><label for="desc">รายการ</label><select id="desc"></select></div>
+      <div><label for="note">หมายเหตุ</label><input id="note" placeholder="ไม่บังคับ"></div>
+      
+      <button class="add" type="submit">+ บันทึก</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>รายการทั้งหมด</h2>
+    <div class="filter" id="filter"></div>
+    <div id="list"></div>
+    <button class="reset" id="reset">ล้างข้อมูลทั้งหมด</button>
+  </div>
+</div>
+
+<script>
+const BANKS=['K+','Make','SCB','MyMo'];
+const KEY='money-tracker-v1';
+let items=[],sel='all';
+try{items=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){items=[]}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(items))}catch(e){}}
+const fmt=n=>n.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const typeLabel={in:'รายรับ',out:'รายจ่าย',pending:'รอดำเนินการ'};
+
+$('bank').innerHTML=BANKS.map(b=>`<option>${b}</option>`).join('');
+const DESCS=['อาหาร','7-11','KhuiAI','เติมเกม','Shopee','อื่น ๆ'];
+$('desc').innerHTML=DESCS.map(d=>`<option>${d}</option>`).join('');
+$('date').valueAsDate=new Date();
+
+function stats(list){
+  let i=0,o=0,p=0,d=0;
+  list.forEach(x=>{if(x.type==='in')i+=x.amount;else if(x.type==='out'){o+=x.amount;if(x.done)d+=x.amount}else p+=x.amount});
+  const mv=Math.min(p,d);p-=mv;i+=mv;
+  return{i,o,p,net:i+p-o};
+}
+const cls=n=>n>0?'pos':n<0?'neg':'';
+
+function render(){
+  $('banks').innerHTML=BANKS.map(b=>{
+    const s=stats(items.filter(x=>x.bank===b));
+    return `<div class="bank"><div class="name"><span>${b}</span></div>
+      <div class="net ${cls(s.net)}">${fmt(s.net)}</div>
+      <div class="row"><span>รับ</span><span class="pos">${fmt(s.i)}</span></div>
+      <div class="row"><span>จ่าย</span><span class="neg">${fmt(s.o)}</span></div>
+      <div class="row"><span>รอดำเนินการ</span><span class="pen">${fmt(s.p)}</span></div></div>`;
+  }).join('');
+  const t=BANKS.map(b=>stats(items.filter(x=>x.bank===b))).reduce((a,s)=>({i:a.i+s.i,o:a.o+s.o,p:a.p+s.p,net:a.net+s.net}),{i:0,o:0,p:0,net:0});
+  $('totNet').textContent=fmt(t.net);$('totNet').className='big '+cls(t.net);
+  $('totIn').textContent=fmt(t.i);$('totOut').textContent=fmt(t.o);$('totPen').textContent=fmt(t.p);
+
+  $('filter').innerHTML=['all',...BANKS].map(b=>`<button type="button" class="chip ${sel===b?'on':''}" data-b="${b}">${b==='all'?'ทั้งหมด':b}</button>`).join('');
+  const shown=items.filter(x=>sel==='all'||x.bank===sel).sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
+  $('list').innerHTML=shown.length?shown.map(x=>{
+    const sign=x.type==='in'?'+':x.type==='out'?'−':'';
+    const c=x.type==='in'?'pos':x.type==='out'?'neg':'pen';
+    const tg=x.type==='in'?'in':x.type==='out'?'out':'pen';
+    return `<div class="item"><div class="info"><div class="t">${esc(x.desc)}<span class="tag ${tg}">${typeLabel[x.type]}</span></div>
+      <div class="s">${x.date} · ${x.bank}</div>${x.note?`<div class="s">📝 ${esc(x.note)}</div>`:''}
+      
+      </div><div class="amt ${c}">${sign}${fmt(x.amount)}</div><button class="del" data-del="${x.id}" aria-label="ลบ">✕</button></div>`;
+  }).join(''):'<div class="empty">ยังไม่มีรายการ</div>';
+}
+
+$('f').addEventListener('submit',e=>{
+  e.preventDefault();
+  const amount=parseFloat($('amount').value);
+  if(!(amount>0))return;
+  items.push({id:Date.now(),date:$('date').value,bank:$('bank').value,desc:$('desc').value,note:$('note').value.trim(),amount,type:document.querySelector('input[name=type]:checked').value==='done'?'out':document.querySelector('input[name=type]:checked').value,done:document.querySelector('input[name=type]:checked').value==='done'});
+  save();$('note').value='';$('amount').value='';render();$('amount').focus();
+});
+$('filter').addEventListener('click',e=>{const b=e.target.dataset.b;if(b){sel=b;render()}});
+$('list').addEventListener('click',e=>{
+  const d=e.target.dataset;
+  if(d.del){items=items.filter(x=>x.id!=d.del);save();render()}
+  
+});
+$('reset').addEventListener('click',()=>{if(confirm('ลบข้อมูลทั้งหมด?')){items=[];save();render()}});
+render();
+</script>
+</body>
+</html>
